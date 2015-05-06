@@ -1,10 +1,14 @@
 #!/usr/local/bin/node
 
+// ImageMagick, Word, wkhtmltopdf
+
 //1. have homebrew
 //2. have ImageMagick
 //3. install Open Office
 //4. brew install unoconv (had to change perms on a few areas, /usr/local/bin, /usr/local/share/man/man1/, via "sudo chown -R tfeiler:admin <path>" to get linking to work)
 //5. set up env, ex: "declare -x UNO_PATH=/Applications/OpenOffice.app/Contents"
+
+console.log("BEGIN PROCESSING (" + (new Date()) + ")");
 
 try {
 	var argv = require('optimist')
@@ -20,9 +24,14 @@ try {
 	return;
 }
 
-execSync("rm " + argv.outputDir + "/*");
 
 var fs = require('fs');
+var path = require('path');
+
+fullInputDir = path.resolve(argv.inputDir);
+
+execSync("rm -f " + argv.outputDir + "/*");
+
 var files = fs.readdirSync(argv.inputDir);
 for (var i in files) {
 	var filename = files[i];
@@ -35,9 +44,16 @@ for (var i in files) {
 		var cmd = "cp '" + argv.inputDir + "/" + filename + "' '" + argv.outputDir + "/" + filename + "'";
 		execSync(cmd);
 	} else {
-		if (extension == "docx" || extension == "txt") {
-			console.log("converting OpenOffice doc...");
-			var cmd = "unoconv --format pdf --output '" + argv.outputDir + "/" + justName + ".pdf' '" + argv.inputDir + "/" + filename + "'";
+		if (extension == "doc" || extension == "docx") {
+			console.log("converting Word doc...");
+			// var cmd = "unoconv --format pdf --output '" + argv.outputDir + "/" + justName + ".pdf' '" + argv.inputDir + "/" + filename + "'";
+			var cmd = "./helpers/wordToPdf.scpt \"" + fullInputDir + "/" + filename + "\"";
+			execSync(cmd);
+			cmd = "mv " + argv.inputDir + "/wordToPdfConverted.pdf '" + argv.outputDir + "/" + justName + ".pdf'";
+			execSync(cmd);
+		} else if (extension == "txt" || extension == "html") {
+			console.log("converting html/text file...");
+			var cmd = "wkhtmltopdf -q '" + argv.inputDir + "/" + filename + "' '" + argv.outputDir + "/" + justName + ".pdf'";
 			console.log(cmd);
 			execSync(cmd);
 		} else if (extension == "jpeg" || extension == "jpg" || extension == "png") {
@@ -55,4 +71,4 @@ for (var i in files) {
 	
 	console.log("-----");
 }
-console.log("DONE!");
+console.log("DONE PROCESSING (" + (new Date()) + ")");
