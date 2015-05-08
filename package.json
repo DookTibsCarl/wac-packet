@@ -2,11 +2,12 @@
   "name": "sophomoreWritingPortfolioPackager",
   "version": "0.0.1",
   "description": "Utility that preps sophomore portfolios.",
-  "main": "converter.sh",
+  "main": "main.sh",
   "dependencies": {
     "optimist": "~0.6.1",
     "xmldoc": "~0.3.0",
-	"exec-sync": "~0.1.6"
+	"exec-sync": "~0.1.6",
+	"sleep": "*"
   },
   "devDependencies": {},
   "scripts": {

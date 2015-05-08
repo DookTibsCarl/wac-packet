@@ -72,3 +72,9 @@ for (var i in files) {
 	console.log("-----");
 }
 console.log("DONE PROCESSING (" + (new Date()) + ")");
+
+// 1. can i tell number of pages in a pdf?
+// 2. can i distinguish between prompt and assignment (file size as proxy?)
+// 3. do I still need to insert a blank if odd num pages?
+// see http://gotofritz.net/blog/howto/joining-pdf-files-in-os-x-from-the-command-line/
+// combine using "/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o PATH/TO/YOUR/MERGED/FILE.pdf /PATH/TO/ORIGINAL/1.pdf /PATH/TO/ORIGINAL/2.pdf
