@@ -23,7 +23,7 @@ var combineStudentFiles = function(workDir, studentNetId) {
 	}
 
 	for (var i = 0 ; i < files.length ; i++) {
-		// execSync("rm \"" + files[i] + "\"");
+		execSync("rm \"" + files[i] + "\"");
 	}
 
 	var pagesInCombo = countPages(workDir + "/" + studentNetId + ".pdf");

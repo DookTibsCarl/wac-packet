@@ -1,6 +1,7 @@
 var execSync = require('exec-sync');
 var path = require('path');
 var fs = require('fs');
+var csg = require('../helpers/coverSheetGenerator');
 
 var countInArray = function(arr, searchString) {
 	var el;
@@ -28,12 +29,15 @@ var	doesSubmissionLookValid =  function(files) {
 	var paper4Count = countInArray(files, "/paper4/");
 	var paper5Count = countInArray(files, "/paper5/");
 
+	return essayCount == 1 && paper1Count >= 1 && paper2Count >= 1 && paper3Count >= 1;
+	/*
 	return essayCount == 1 &&
 		paper1Count == 2 &&
 		paper2Count == 2 &&
 		paper3Count == 2 &&
 		(paper4Count == 2 || paper4Count == 0) &&
 		(paper5Count == 2 || paper5Count == 0);
+	*/
 };
 
 var convertSingleFile = function(filename, destinationDir, netId, singleFileCounter) {
@@ -123,7 +127,7 @@ var fileSorter = function(a, b) {
 	return 0;	
 };
 
-var convertStudentFiles = function(sourceDir, destDir, studentFullName, studentNetId) {
+var convertStudentFiles = function(sourceDir, destDir, studentFullName, studentNetId, rawStudentData) {
 	console.log("working on [" + studentFullName + "]/[" + studentNetId + "]");
 
 	var findCmd = "find " + sourceDir + " -name \"" + studentFullName + "_*\"";
@@ -136,6 +140,7 @@ var convertStudentFiles = function(sourceDir, destDir, studentFullName, studentN
 
 		if (doesSubmissionLookValid(inputFiles)) {
 			console.log("submission valid - proceeding");
+			var madeCoverSheet = csg.generateCoversheet(sourceDir, destDir, studentNetId, rawStudentData);
 			for (var i = 0 ; i < inputFiles.length ; i++) {
 				convertSingleFile(inputFiles[i], destDir, studentNetId, zeroPad(i+1));
 			}
