@@ -78,7 +78,9 @@ var convertSingleFile = function(filename, destinationDir, netId, singleFileCoun
 		}
 	} else {
 		console.log("cannot handle this format: [" + extension + "] -- NEED TO LOG THIS SOMEHOW!!!");
+		return false;
 	}
+	return true;
 };
 
 var zeroPad = function(num) {
@@ -127,10 +129,10 @@ var fileSorter = function(a, b) {
 	return 0;	
 };
 
-var convertStudentFiles = function(sourceDir, destDir, studentFullName, studentNetId, rawStudentData) {
-	console.log("working on [" + studentFullName + "]/[" + studentNetId + "]");
+var convertStudentFiles = function(sourceDir, destDir, studentFullName, filesystemKey, studentNetId, rawStudentData) {
+	console.log("working on [" + studentFullName + "]/[" + filesystemKey + "]/[" + studentNetId + "]");
 
-	var findCmd = "find " + sourceDir + " -name \"" + studentFullName + "_*\"";
+	var findCmd = "find " + sourceDir + " -name \"" + filesystemKey + "_*\"";
 	var inputFilesRaw = execSync(findCmd);
 
 	if (inputFilesRaw.length > 0) {
@@ -141,8 +143,13 @@ var convertStudentFiles = function(sourceDir, destDir, studentFullName, studentN
 		if (doesSubmissionLookValid(inputFiles)) {
 			console.log("submission valid - proceeding");
 			var madeCoverSheet = csg.generateCoversheet(sourceDir, destDir, studentNetId, rawStudentData);
+
+			if (!madeCoverSheet) { console.log("FAILED creating coversheet; bailing..."); return false; }
+
 			for (var i = 0 ; i < inputFiles.length ; i++) {
-				convertSingleFile(inputFiles[i], destDir, studentNetId, zeroPad(i+1));
+				var lastAttempt = convertSingleFile(inputFiles[i], destDir, studentNetId, zeroPad(i+1));
+
+				if (lastAttempt == false) { return false; }
 			}
 			return true;
 		} else {

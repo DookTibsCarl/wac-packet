@@ -22,7 +22,7 @@ module.exports = {
 
 	// take two - instead of hitting Moodle API, let's just parse a local file to get
 	// student names and their completion times
-	getCompletedStudentData: function(dataFile, getEvenIncompleteStudents) {
+	getCompletedStudentData: function(dataFile, aliases, getEvenIncompleteStudents) {
 		// var cmd = "awk -f helpers/getCompletedStudentsData.awk " + dataFile;
 		var cmd = "cat " + dataFile + " | awk -f helpers/get" + (getEvenIncompleteStudents ? "All" : "Completed") + "StudentsData.awk";
 
@@ -32,7 +32,22 @@ module.exports = {
 		var userData = [];
 		for (var i = 0 ; i < userDataChunks.length ; i++) {
 			var singleLineChunks = (userDataChunks[i]).split("|");
-			userData.push({ username: singleLineChunks[0], name: singleLineChunks[1], submissionDate: singleLineChunks[2] });
+
+			// when downloading from Moodle, it names files based on student name, NOT username. So sometimes there
+			// are conflicts. In 2015 for instance there were two students with same name but different usernames. 
+			// This is a real PITA. We need to manually inspect the files on the filesystem and name them appropriately,
+			// and then add an entry in config.js indicating the filesystem name that correponds to the username.
+			//
+			// FOR EXAMPLE - say we have Joe Smith / smithj1 / "Joe Smith Essay.pdf", and
+			// Joe Smith / smithj2 / "Joe Smith Statement.doc". On the filesystem we'd rename to "Joe SmithOne Essay.pdf" and
+			// "Joe SmithTwo Statement.doc", and then add aliases in config.js like .........FINISH ME
+			var fsName = singleLineChunks[1];
+			fsName = fsName.replace(/'/g, "");
+			if (aliases[singleLineChunks[0]] != undefined) {
+				fsName = aliases[singleLineChunks[0]];
+			}
+
+			userData.push({ username: singleLineChunks[0], fsKey: fsName, name: singleLineChunks[1], submissionDate: singleLineChunks[2] });
 		}
 
 
@@ -51,21 +66,18 @@ module.exports = {
 			});
 		}
 
-		var studentFullNameToData = {};
+		var studentUsernameToData = {};
 
 		for (var i = 0 ; i < userData.length ; i++) {
 			var loopData = userData[i];
 
-			var storageKey = loopData.name;
-			while (studentFullNameToData[storageKey] != undefined) {
-				console.log("!!! WARNING - DUPLICATE STUDENT NAME [" + loopData.name + "]!!!");
-				storageKey += "x";
-			}
-			studentFullNameToData[storageKey] = loopData;
+			var storageKey = loopData.username;
+			studentUsernameToData[storageKey] = loopData;
 		}
-		return { count: userData.length, data: studentFullNameToData };
-	},
+		return { count: userData.length, data: studentUsernameToData };
+	}
 	
+	/*
 	getStudentData: function(courseId, token) {
 		var cmd = "curl -s -X POST -F 'courseid=" + courseId + "' -F 'options[0][name]=userfields' -F 'options[0][value]=department,email,fullname,id,username,lastname,firstname' 'https://moodle2014-15.carleton.edu/webservice/rest/server.php?wstoken=" + token + "&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json'"
 		var userDataRaw = execSync(cmd);
@@ -93,4 +105,5 @@ module.exports = {
 
 		return { count: studentsFound, data: studentFullNameToData };
 	}
+	*/
 }

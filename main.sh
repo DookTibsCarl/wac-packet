@@ -1,5 +1,7 @@
 #!/usr/local/bin/node
 
+// try  "tail -f whatever.log | grep "\(working\|BREAKING\|cannot\)"
+
 // ./main.sh --token 07d41b4fb246b36061f499494acac7c0 --courseId 15741 --inputDir ../realData --outputDir output
 
 // bit of a mess. Node.js but uses a ton of shell commands/scripts (sed, find, etc.). Requires a MS Word install, ImageMagick, wkhtmltopdf. Uses AppleScript!
@@ -48,9 +50,9 @@ stampLog("STEP 1 - fetching user data via Moodle webservices api...");
 var justLabelData = false;
 
 // var studentPackage = studentDataFetcher.getStudentData(config.courseId, config.moodleApiToken);
-var studentPackage = studentDataFetcher.getCompletedStudentData(config.inputDir + "/progress.csv", justLabelData);
+var studentPackage = studentDataFetcher.getCompletedStudentData(config.inputDir + "/progress.csv", config.fullNameAliases, justLabelData);
 var studentsFound = studentPackage.count;
-var studentFullNameToData = studentPackage.data;
+var studentUsernameToData = studentPackage.data;
 
 if (studentsFound == 0) {
 	console.log("no students found - exiting");
@@ -72,18 +74,19 @@ function checkForExistingFile(netId) {
 	return existingFile;
 }
 
-for (fullName in studentFullNameToData) {
-	var data = studentFullNameToData[fullName];
+for (username in studentUsernameToData) {
+	var data = studentUsernameToData[username];
+	var fullName = data.name;
 	var submissionDate = new Date(Date.parse(data.submissionDate));
 
-	// undo the "Brownx" nonsense
-	// if (data.username == "brownh3") { fullName = "Hunter Brown"; }
-	stampLog("Processing [" + i + "]/[" + fullName + "]/[" + data.username + "]/[" + submissionDate + "]...");
+	stampLog("Processing [" + i + "]/[" + fullName + "]/[" + data.username + "]/[" + data.fsKey + "]/[" + submissionDate + "]...");
 
+	/*
 	if (submissionDate.getMonth() >= 3) {
 		console.log("CURRENTLY NOT RUNNING FOR STUDENTS WHO SUBMITTED AFTER MARCH, 2015");
 		continue;
 	}
+	*/
 
 	if (justLabelData) {
 		var ldapData = studentDataFetcher.getLdapData(data.username);
@@ -112,11 +115,13 @@ for (fullName in studentFullNameToData) {
 
 		// if (madeCoverSheet) {
 		if (true) {
-			var didConvert = converter.convertStudentFiles(config.inputDir, config.outputDir, fullName, data.username, data);
+			var didConvert = converter.convertStudentFiles(config.inputDir, config.outputDir, fullName, data.fsKey, data.username, data);
 
 			if (didConvert) {
 				combiner.combineStudentFiles(config.outputDir, data.username);
 				numConverted++;
+			} else {
+				console.log("FAILED TO CONVERT [" + data.username + "]");
 			}
 
 			if (config.chunkSize > 0) {
