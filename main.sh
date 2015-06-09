@@ -30,6 +30,12 @@ try {
 	return;
 }
 
+// JUST GENERATE COVERSHEET - START
+// var csg = require('./helpers/coverSheetGenerator');
+// csg.generateBlankCoversheet("output/coversheet.html");
+// return;
+// JUST GENERATE COVERSHEET - END
+
 var config = require('./helpers/config').config;
 
 console.log("Opening ssh tunnel...");

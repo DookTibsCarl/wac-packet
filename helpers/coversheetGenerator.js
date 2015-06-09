@@ -36,6 +36,8 @@ var formatDate = function(d) {
 };
 
 var getProjectMetadata = function(md, projectNum, offset) {
+	if (md == null) { return ""; }
+
 	var baseIdx = 0;
 	if (projectNum == 1) { baseIdx = MD_PROJECT_1; }
 	if (projectNum == 2) { baseIdx = MD_PROJECT_2; }
@@ -92,6 +94,24 @@ var generateProjectHtml = function(md, projectNum) {
 	return html;
 }
 
+var generateBlankCoversheet = function(outputFilename) {
+	html = "";
+	html += "<center><h3>Carleton College: Portfolio Submission Form</h3></center><p>";
+		html += "<table width=100% border=0><tr>";
+			html += "<td width=50%>Name: </td>";
+			html += "<td>Colleague ID: </td>";
+			html += "</tr><tr>";
+			html += "<td>Class Year: </td>";
+			html += "<td>Date Submitted: </td>";
+		html += "</tr></table><p>";
+
+	for (var i = 1 ; i <= 5 ; i++) {
+		html += generateProjectHtml(null, i);
+	}
+
+	fs.writeFileSync(outputFilename, html);
+}
+
 var generateCoversheet = function(inputDir, outputDir, netId, rawStudentData) {
 	console.log("generating coversheet for [" + netId + "]...");
 
@@ -145,5 +165,6 @@ var generateCoversheet = function(inputDir, outputDir, netId, rawStudentData) {
 };
 
 module.exports = {
-	generateCoversheet: generateCoversheet
+	generateCoversheet: generateCoversheet,
+	generateBlankCoversheet: generateBlankCoversheet
 };
