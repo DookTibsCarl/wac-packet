@@ -72,7 +72,7 @@ var generateProjectHtml = function(md, projectNum) {
 	html += "</tr></table>";
 	html += "<table border=0 width=100%><tr>";
 	html += "<td width=50%>Instructor: " + getProjectMetadata(md, projectNum, MD_OFFSET_INSTRUCTOR) + "</td>";
-	html += "<td width=50%>Project Revised for portofolio? " + (1 == getProjectMetadata(md, projectNum, MD_OFFSET_REVISED) ? "Yes" : "No") + "</td>";
+	html += "<td width=50%>Project Revised for portofolio? " + (md == null ? "" : (1 == getProjectMetadata(md, projectNum, MD_OFFSET_REVISED) ? "Yes" : "No")) + "</td>";
 	html += "</tr>";
 	html += "</table>";
 
