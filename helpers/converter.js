@@ -23,13 +23,17 @@ var execSyncWrapper = function(cmd) {
 var	doesSubmissionLookValid =  function(files) {
 	// we need an essay, and at least 3 prompt/paper pairs. Emphasis on PAIRS.
 	var essayCount = countInArray(files, "/essay/");
-	var paper1Count = countInArray(files, "/paper1/");
-	var paper2Count = countInArray(files, "/paper2/");
-	var paper3Count = countInArray(files, "/paper3/");
-	var paper4Count = countInArray(files, "/paper4/");
-	var paper5Count = countInArray(files, "/paper5/");
+	var paper1PCount = countInArray(files, "/paper1_prompt/");
+	var paper1SCount = countInArray(files, "/paper1_submission/");
+	var paper2PCount = countInArray(files, "/paper2_prompt/");
+	var paper2SCount = countInArray(files, "/paper2_submission/");
+	var paper3PCount = countInArray(files, "/paper3_prompt/");
+	var paper3SCount = countInArray(files, "/paper3_submission/");
 
-	return essayCount == 1 && paper1Count >= 1 && paper2Count >= 1 && paper3Count >= 1;
+	return essayCount == 1
+		&& (paper1PCount == 1 && paper1SCount == 1)
+		&& (paper2PCount == 1 && paper2SCount == 1)
+		&& (paper3PCount == 1 && paper3SCount == 1);
 	/*
 	return essayCount == 1 &&
 		paper1Count == 2 &&
@@ -106,14 +110,26 @@ var fileSorter = function(a, b) {
 	} else if (aArea != "essay" && bArea == "essay") {
 		return 1;
 	} else {
-		var aPaperNum = Number(aArea.substr(-1));
-		var bPaperNum = Number(bArea.substr(-1));
+		var aPaperNum = Number(aArea.substr(5, 1));
+		var bPaperNum = Number(bArea.substr(5, 1));
 
 		if (aPaperNum < bPaperNum) {
 			return -1;
 		} else if (aPaperNum > bPaperNum) {
 			return 1;
 		} else {
+			// "p" for prompt or "s" for submission
+			var aType = aArea.substr(7, 1);
+			var bType = bArea.substr(7, 1);
+
+			if (aType < bType) {
+				return -1;
+			} else if (aType > bType) {
+				return 1;
+			} else {
+				return 0;
+			}
+			/*
 			var aStats = fs.statSync(a);
 			var bStats = fs.statSync(b);
 
@@ -124,6 +140,7 @@ var fileSorter = function(a, b) {
 			} else if (aSize > bSize) {
 				return 1;
 			}
+			*/
 		}
 	}
 	return 0;	
